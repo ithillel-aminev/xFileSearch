@@ -20,6 +20,7 @@ class Parser {
         $type = false;
         $language = $this->getValue('language');
         $region = $this->getValue('region');
+        $time = $this->getValue('time');
         $languageCode = $language ? strtolower($language) : '';
         $regionCode = $region ? strtoupper($region) : '';
         $locale = $languageCode;
@@ -44,7 +45,7 @@ class Parser {
             }
             if ($type !== false){
                 $obj = EntityFactory::create($type, $config, $this->generalConfig['base_url']);
-                $result[$key][$locale] = $obj->search($languageCode, $regionCode, time());
+                $result[$key][$locale] = $obj->search($languageCode, $regionCode, $time);
             }
 
         }

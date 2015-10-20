@@ -25,11 +25,8 @@ abstract class Entity {
 
     public function search($language, $region = false, $time = false)
     {
-        $result = array();
-
         $languageCode = strtolower($language);
         $regionCode = ($region) ? strtoupper($region) : '';
-        $localeText = $languageCode . '_' . $regionCode;
 
         // text filter
         $texts = array();
@@ -59,26 +56,20 @@ abstract class Entity {
             }
 
         }
-        return $files;
 
-        //TODO time filter
-
-
-        $is_numeric = array_key_exists(0, $files);
-        if ($is_numeric) {
-            foreach ($files as $file){
-                $result[$localeText][] = $file;
-            }
-        } else {
-            foreach ($files as $key=>$fileGroup) {
-                foreach ($fileGroup as $file){
-                    $result[$localeText][$key][] = $file;
+        // time filter
+        if ($time) {
+            if ($is_numeric) {
+                $files = $this->filterByTime($files, $time);
+            } else {
+                foreach ($files as $key=>$fileGroup) {
+                    $files[$key] = $this->filterByTime($fileGroup, $time);
                 }
+
             }
         }
 
-
-        return $result;
+        return $files;
 
     }
 
@@ -94,5 +85,11 @@ abstract class Entity {
     {
         return array_filter($array, function($val) use ($text){return strpos($val, $text) !== false;});
     }
+
+    protected function filterByTime($array, $time)
+    {
+        return array_filter($array, function($file) use ($time) {return filemtime($file) > $time;});
+    }
+
 
 }
