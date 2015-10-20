@@ -23,19 +23,16 @@ class Parser {
         if ($regionCode)
             $locale .= "_". $regionCode;
 
-        if(!$languageCode) {
-            throw new \Exception('no language');
-        }
         foreach ($this->parseConfig as $key=>$config){
             $obj = new Entity($config, $this->generalConfig['base_url']);
             $result[$key][$locale] = $obj->search($languageCode, $regionCode, $time);
         }
 
-        return json_encode($result);
+        return $result;
 
     }
 
-    private function getValue($key)
+    public static function getValue($key)
     {
         if (empty($key) || !is_string($key) || !isset($_GET[$key])){
             return false;
