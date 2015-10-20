@@ -7,10 +7,9 @@ $p = new Parser();
 
 if (!Parser::getValue('language')) {
     header('HTTP/1.0 400 Bad request');
-} else {
-    header('HTTP/1.0 200 OK');
+    return;
 }
-header('Content-Type: application/json');
 
-die(json_encode($p->parse()));
+header('Content-Type: application/json');
+print(json_encode($p->parse()));
 
