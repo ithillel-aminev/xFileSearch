@@ -6,10 +6,7 @@
  * Time: 14:31
  */
 
-namespace Taminev\Xfilessearch;
-
-
-abstract class Entity {
+class Entity {
 
     protected $name;
 
@@ -25,6 +22,9 @@ abstract class Entity {
 
     public function search($language, $region = false, $time = false)
     {
+        if (!$this->getSearchDir()){
+            return null;
+        }
         $languageCode = strtolower($language);
         $regionCode = ($region) ? strtoupper($region) : '';
 
@@ -36,10 +36,10 @@ abstract class Entity {
         }
         if ($texts){
             foreach ($texts as $text){
-                $files[$text] = glob($this->getSearchDir() . "*$text*");
+                $files[$text] = $this->rglob($this->getSearchDir() . "*$text*");
             }
         } else {
-            $files = glob($this->getSearchDir() . "*");
+            $files = $this->rglob($this->getSearchDir() . "*");
         }
 
         // locale filter
@@ -77,8 +77,10 @@ abstract class Entity {
         if(!isset($this->config)){
             return false;
         }
-        $subDir = isset($this->config['subDir']) ? $this->config['subDir'] : '';
-        return Parser::normalizeDirectory(Parser::normalizeDirectory($this->base_url) . $subDir);
+        if (!isset($this->config['subDir']) || empty($this->config['subDir'])){
+            return false;
+        }
+        return Parser::normalizeDirectory(Parser::normalizeDirectory($this->base_url) . $this->config['subDir']);
     }
 
     protected function filterByText($array, $text)
@@ -90,6 +92,15 @@ abstract class Entity {
     {
         return array_filter($array, function($file) use ($time) {return filemtime($file) > $time;});
     }
+
+    private function rglob($pattern, $flags = 0) {
+        $files = glob($pattern, $flags);
+        foreach (glob(dirname($pattern).DIRECTORY_SEPARATOR.'*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+            $files = array_merge($files, $this->rglob($dir.DIRECTORY_SEPARATOR.basename($pattern), $flags));
+        }
+        return $files;
+    }
+
 
 
 }

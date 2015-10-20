@@ -1,8 +1,5 @@
 <?php
 
-namespace Taminev\Xfilessearch;
-
-
 class Parser {
 
     private $parseConfig;
@@ -17,7 +14,6 @@ class Parser {
 
     public function parse(){
         $result = array();
-        $type = false;
         $language = $this->getValue('language');
         $region = $this->getValue('region');
         $time = $this->getValue('time');
@@ -31,23 +27,8 @@ class Parser {
             throw new \Exception('no language');
         }
         foreach ($this->parseConfig as $key=>$config){
-            switch($key){
-                case 'products':
-                    $type = EntityFactory::PRODUCTS;
-                    break;
-                case 'videos':
-                    $type = EntityFactory::VIDEOS;
-                    break;
-                case 'html':
-                    $type = EntityFactory::HTML;
-                    break;
-
-            }
-            if ($type !== false){
-                $obj = EntityFactory::create($type, $config, $this->generalConfig['base_url']);
-                $result[$key][$locale] = $obj->search($languageCode, $regionCode, $time);
-            }
-
+            $obj = new Entity($config, $this->generalConfig['base_url']);
+            $result[$key][$locale] = $obj->search($languageCode, $regionCode, $time);
         }
 
         return json_encode($result);
